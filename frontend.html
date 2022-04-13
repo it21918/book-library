@@ -188,8 +188,6 @@
                                 <td> ${item.price} </td>
                             </tr>
                             </table>`
-                            //<td><button id=${item.id}   onClick="myFunc(this.id);">Delete</button></td>
-;
 
                         });
                     }
@@ -200,19 +198,6 @@
 
     });
 
-    /*
-    function myFunc(id){
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `http://localhost:1717/books/delete/${id}`, true);
-            xhr.send();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        alert(xhr.responseText);
-                    }
-                }
-            };
-    }*/
 
     function openNavAdd() {
         document.getElementById("sideNavigationAdd").style.width = "60%";
