@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <ul>
+        <li><input type="button" value='Add Book' id="Add_book" class="button" onclick="openNavAdd()" &#9776;></li>
+        <li><input type="button" value='Search Book' id="Search_book" class="button" onclick="openNavSearch()" &#9776;></li>
+    </ul>
+
+    <div id="sideNavigationSearch" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNavSearch()">&times;</a>
+        <td>
+            <h>Enter the name of the book</h>
+        </td>
+        <td><input type="text" id="searchBar"></td>
+        <td><input type="button" id="returnBook" value="search"></td>
+        <td>
+            <div id="bookArea" ></div>
+        </td>
+    </div>
+
+    <div id="sideNavigationAdd" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNavAdd()">&times;</a>
+        <table>
+            <form name="add_book" id="register">
+                <tbody>
+                    <tr>
+                        <td>
+                            <h>Fill the following form.</h>
+                        </td>
+                    <tr>
+                        <th>Author :</th>
+                        <td><input type="text" id="author"></td>
+                        <td>
+                            <div id="authorError"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Genre :</th>
+                        <td><select id="genre">
+                                <option value="Science fiction">Science fiction</option>
+                                <option value="Satira">Satira</option>
+                                <option value="Drama">Drama</option>
+                                <option value="Action and Adventure">Action and Adventure</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Horror">Horror</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Title :</th>
+                        <td><input type="text" id="title"></td>
+                        <td>
+                            <div id="titleError"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Price :</th>
+                        <td><input type="text" id="price"></td>
+                        <td>
+                            <div id="priceError"></div>
+                    </tr>
+                    </tr>
+                    <tr>
+                        <td><input type="button" id="sendRequest" value="submit"></td>
+                    </tr>
+
+                </tbody>
+            </form>
+        </table>
+    </div>
+</body>
+
+<script type="text/javascript">
+    window.addEventListener('load', (event) => {
+
+        document.getElementById('sendRequest').addEventListener('click', function(event) {
+
+            const author = document.getElementById('author').value;
+            const title = document.getElementById('title').value;
+            const genre = document.getElementById('genre').value;
+            const price = document.getElementById('price').value;
+
+            var errors = 0;
+
+            const divElemPrice = document.getElementById('priceError');
+            for (let i = divElemPrice.childNodes.length - 1; i >= 0; i--) {
+                divElemPrice.removeChild(divElemPrice.childNodes[i]);
+            }
+            const divElemAuthor = document.getElementById('authorError');
+            for (let i = divElemAuthor.childNodes.length - 1; i >= 0; i--) {
+                divElemAuthor.removeChild(divElemAuthor.childNodes[i]);
+            }
+            const divElemTitle = document.getElementById('titleError');
+            for (let i = divElemTitle.childNodes.length - 1; i >= 0; i--) {
+                divElemTitle.removeChild(divElemTitle.childNodes[i]);
+            }
+
+            if (price == '' || !(/^\d+\.\d+$|^\d+$/.test(price)) || price <= 0) {
+                errors++;
+                const pElemPrice = document.createElement('p');
+                const hElemPrice = document.createTextNode("The price's input is wrong. You must enter a positive number.")
+                pElemPrice.appendChild(hElemPrice);
+                divElemPrice.appendChild(pElemPrice);
+            }
+            if (author == '') {
+                errors++;
+                const pElemAuthor = document.createElement('p');
+                const hElemAuthor = document.createTextNode("You must enter the authos's name.")
+                pElemAuthor.appendChild(hElemAuthor);
+                divElemAuthor.appendChild(pElemAuthor);
+            }
+            if (title == '') {
+                errors++;
+                const pElemTitle = document.createElement('p');
+                const hElemTitle = document.createTextNode("You must enter the titles's name.")
+                pElemTitle.appendChild(hElemTitle);
+                divElemTitle.appendChild(pElemTitle);
+            }
+
+            if (errors > 0) {
+                event.preventDefault();
+                return -1;
+            }
+
+            const book = {
+                'author': author,
+                'title': title,
+                'genre': genre,
+                'price': price
+            };
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:1717/books/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(book));
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        alert(xhr.responseText);
+                    }
+                }
+            };
+
+        });
+
+
+        document.getElementById('returnBook').addEventListener('click', (event) => {
+            const key = document.getElementById('searchBar').value;
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `http://localhost:1717/books/${key}`, true);
+            xhr.send();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        let divElem = document.getElementById('bookArea');
+
+                        for (let i = divElem.childNodes.length - 1; i >= 0; i--) {
+                            divElem.removeChild(divElem.childNodes[i]);
+                        }
+
+                        const results = JSON.parse(xhr.responseText);
+                        if (results.length == 0) {
+                            alert("We couldn't found the book/s");
+                        }
+
+                        results.forEach((item) => {
+                            divElem.innerHTML += 
+                            `<table>
+                            <tr>
+                                <th> Id </th>
+                                <th> Name </th>
+                                <th> Title </th>
+                                <th> Genre </th>
+                                <th> Price </th>
+                            </tr>
+                            <tr>
+                                <td> ${item.id} </td>
+                                <td> ${item.author} </td>
+                                <td> ${item.title} </td>
+                                <td> ${item.genre} </td>
+                                <td> ${item.price} </td>
+                            </tr>
+                            </table>`
+                            //<td><button id=${item.id}   onClick="myFunc(this.id);">Delete</button></td>
+;
+
+                        });
+                    }
+                }
+            }; 
+
+        });
+
+    });
+
+    /*
+    function myFunc(id){
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `http://localhost:1717/books/delete/${id}`, true);
+            xhr.send();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        alert(xhr.responseText);
+                    }
+                }
+            };
+    }*/
+
+    function openNavAdd() {
+        document.getElementById("sideNavigationAdd").style.width = "60%";
+    }
+
+    function openNavSearch() {
+        document.getElementById("sideNavigationSearch").style.width = "60%";
+    }
+
+    function closeNavAdd() {
+        document.getElementById("sideNavigationAdd").style.width = "0";
+    }
+
+    function closeNavSearch() {
+        document.getElementById("sideNavigationSearch").style.width = "0";
+    }
+</script>
+
+</html>
