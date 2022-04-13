@@ -35,17 +35,6 @@ app.post('/books/',(req,res) => {
     });
 });
 
-/*
-app.post('/books/delete/:id', (req,res) => {
-    const id = req.params.id;
-    db.run('Delete From books id = ?', id, (err)=>{
-        if(err) {
-            res.send('Error executing query.');
-        } else {
-            res.send('The book has been added.');
-        }
-    });
-});*/
 
 app.listen(1717);
 
